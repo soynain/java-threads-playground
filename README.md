@@ -302,4 +302,114 @@ cómo en que escenarios aplican estos hilos? es una concurrencia básica. Pero t
 
 No voy a refactorizar esos códigos, que flojera, pero para que se den una idea de esos casos de uso de hilos generados manualmente.
 
-La clase moderna es ExecutorService. 
+La clase moderna es ExecutorService. Una clase que te permite generar múltiples estrategias.
+Primero, cabe recalcar que hay dos tipos de tareas a considerar para hilos:
+
+I/O Bound: llamadas a apis, y bdd's, fetches en general
+
+CPU Bound: calculos de arreglos u operaciones
+
+Si ejecutamos ese processing con el executor bajo un fixesthreads, y la misma cantidad de hilos que crearamos en un for:
+
+````main.java
+ExecutorService executor = Executors.newFixedThreadPool(50); // io bound we
+````
+
+Nos saldrá el mismo input, pero tu sintaxis y clase se vuelven más limpias, y debes pretener los objetos para
+que ese pool de hilos los puedas inyectar:
+
+<img width="1270" height="1070" alt="image" src="https://github.com/user-attachments/assets/3da8ddd0-fbb4-4c80-bc93-54a8cd692747" />
+
+
+Sale un resultado similar a que si hicieras los threads con un for, más controlado y minimalista.
+Tampoco debes usar locks, el executor ya implementa una clase que se encarga de eso.
+
+Tu clase ahora queda más limpia:
+
+````main.java
+public class OrderThreads{
+
+    private static volatile Integer orderStock = 10;
+
+    private volatile long startTime = System.currentTimeMillis();
+
+    private volatile long endTime = 0L;
+
+    private volatile long totalTime = 0L;
+
+    private long TO_SECONDS = 1000;
+
+    private ArrayList<Order> orders;
+
+    public OrderThreads(ArrayList<Order> orders){
+        this.orders = orders;
+    }
+
+    public void processOrderV2(){
+        ExecutorService executor = Executors.newFixedThreadPool(51); // io bound we
+        executor.submit(this::processingLogic);
+        try {
+            executor.awaitTermination(13, java.util.concurrent.TimeUnit.SECONDS);
+            executor.shutdownNow();
+        } catch (Exception e) {
+            executor.shutdown();
+        }
+    }
+
+    public void processingLogic(){
+        for (int i = 0; i < orders.size(); i++) {
+            if(orderStock >0){
+                Order order = orders.get(i);
+                System.out.println("Processing order ID: " + order.getId() + " with processing time: " + order.getProcessingTime() + "ms");
+                try {
+                    Thread.sleep(order.getProcessingTime());
+                    orderStock--;
+                    System.out.println("Completed order ID: " + order.getId() + ". Remaining stock: " + orderStock+". Processed by thread: " + Thread.currentThread().getName());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }else{
+                System.out.println("No more orders to process.");
+                endTime = System.currentTimeMillis();
+                totalTime = endTime - startTime;
+
+                System.out.println("Total execution time: " + totalTime / TO_SECONDS + "ms");
+                break;
+            }
+            
+        }
+    }
+    
+}
+````
+
+Y tu main ya no depende de un for, el thread pool ya te aparta los hilos:
+
+````main.java
+public static void main(String[] args) throws IOException, InterruptedException {
+
+        System.out.println(Thread.activeCount()+" numeros de hilos antes de iniciar");
+        System.out.println(ManagementFactory.getThreadMXBean().getThreadCount()+" otra medida mas preciza");
+        System.out.println("UNIVERSO DE LA MAQUINA: "+ Runtime.getRuntime().availableProcessors());
+       /*  for (int i = 0; i < 51; i++) {
+            Thread orderThread = new Thread(new OrderThreads());
+            orderThread.start();
+        } */
+
+        List<Order> orders = new ArrayList<Order>();
+
+        for (int i = 0; i < 5000; i++) {
+            orders.add(new Order(UUID.randomUUID().toString()));
+        }
+
+
+        OrderThreads orderThreads = new OrderThreads((ArrayList<Order>) orders);
+
+        orderThreads.processOrderV2();
+    }
+````
+
+Mismo output y rendimiento:
+
+<img width="1176" height="845" alt="image" src="https://github.com/user-attachments/assets/462e1433-5aa2-4072-958f-a3fbbd12aa79" />
+
