@@ -155,4 +155,151 @@ El lock funciona mejor que el syncronized para el bloqueo de recursos volatiles 
 <img width="1027" height="482" alt="image" src="https://github.com/user-attachments/assets/d710ffd6-44ea-4b9f-bff5-66b639370560" />
 
 
-Le continuaremos mañana pero si está interesante.
+Ahora, toda esta medología aborda el control de los hilos a mano, un tema que se manejó desde java 5, el mejor handler para esos
+escenarios es el ExecutorService, con diferentes estrategias. Pero no nos adelantemos.
+
+Antes de concluír el escenario, la estrategia del Runnable y Thread no es mala, pero solo aplica en escenarios
+donde si sabes cuantos hilos vas a ocupar.
+
+Mencioné hace tiempo que hice un Tamagochi que pueden encontrar aqui:
+
+https://github.com/soynain/tamagochiJavaTap/blob/master/src/newpackage/Mascota.java
+
+Vean el archivo y notarán que ocupo muchas banderas, para esto:
+
+<img width="1979" height="1094" alt="image" src="https://github.com/user-attachments/assets/9313576d-708b-4de7-91ec-c3ee05d6635b" />
+
+Esto es código puerco, lo que hacia en esta clase era generar componentes dinámicos en Swing (aquí avalo que era un dios con java desde la uni jejejeje)
+
+y en base a una bandera global, si las estadisticas del tamagochi llegaban a 0, ya moría el hilo y ese tamagochi se moría.
+
+<img width="1958" height="1002" alt="image" src="https://github.com/user-attachments/assets/b0ed7987-a414-4f35-8369-7db7b4921f59" />
+
+Por cada iteración del hilo dormías el hilo 5 segundos y restabas al azar en el tamagochi sus estadisticas, y como
+el hilo encapsulaba sus propias variables, con métodos set vinculados al componente SWING, aumentabas
+las estadisticas del hilo:
+
+<img width="1097" height="548" alt="image" src="https://github.com/user-attachments/assets/6cedcd13-6422-4772-a499-7f0b488adff7" />
+
+En epocas donde no existía chat gpt, hacer esto te hacia sentir un dios, y ciertamente era problemático ver o saber
+como hacer componentes dinámicos en algo tan estrecho como SWING, combinando un layout hecho con el interface constructor y
+combinando el layout declarativo.
+
+Y se añadia la grilla con el declarativo de swing e iniciabas tu instancia:
+
+<img width="1422" height="765" alt="image" src="https://github.com/user-attachments/assets/fbaf1565-39e8-4ce0-8ce1-6ee3fdede1d5" />
+
+Las acciones del tamagochi con el hilo eran declarativas, y con un action listener tus métodos vivian internamente:
+
+<img width="1624" height="891" alt="image" src="https://github.com/user-attachments/assets/5f3921b0-a480-47d5-b421-53e6b627b85a" />
+
+Un código espantoso pero funcional.
+
+Nada del otro mundo estos métodos, también habia hecho una galeria de imagenes en java, que transicionaba sus hilos de
+manera rápida, lo pueden checar acá:
+
+<img width="1624" height="891" alt="image" src="https://github.com/user-attachments/assets/2772a9be-a301-4215-9cad-9d7a5ce93a6e" />
+
+El chiste recaía en que si presionabas un botón de 1x a 4x, aumentaba la velocidad.
+
+El método sucio era declarar 4 hilos, solo despertar uno, si seleccionaban x velocidad, detenías todos e iniciabas el hilo
+con un Thread.sleep menor
+
+<img width="2559" height="1439" alt="image" src="https://github.com/user-attachments/assets/16527a9c-5021-4ed9-a5be-6e4276e6be13" />
+
+Serie 4 tiene el menor thread.sleep
+
+````main.java
+class serieCuatro implements Runnable {
+
+    public boolean iterar;
+    public JLabel galy;
+    fileInstancia global;
+    public JRadioButton unoX, dosX, tresX, cuatroX;
+    public JButton leer, iniciar, bocina;
+    ArrayList<ImageIcon> labelCambio;
+    serieCuatro(JLabel lblGaleria, JRadioButton uno, JRadioButton dos, JRadioButton tres, JRadioButton cuatro, JButton ini, JButton boci) {
+        this.galy = lblGaleria;
+        global = new fileInstancia();
+        this.unoX = uno;
+        this.dosX = dos;
+        this.tresX = tres;
+        this.cuatroX = cuatro;
+        this.bocina = boci;
+        this.iniciar = ini;
+        labelCambio=new ArrayList();
+    }
+
+    @Override
+    public void run() {
+        while (iterar != false && global.getLongitudArr() >= global.getContadorImg()) {
+            galy.setIcon(new ImageIcon(new ImageIcon(global.indexArreglo(global.getContadorImg()).getAbsolutePath()).getImage().getScaledInstance(galy.getWidth(), galy.getHeight(), Image.SCALE_SMOOTH)));
+            global.aumentarCont();
+            if (global.getContadorImg() > global.getLongitudArr()) {
+                detener();
+                JOptionPane.showMessageDialog(galy, "CREDITOS: \n miembros del equipo: el de los chescos: Soto Guzmán Moisés Nain \n la que editó las fotos: Maria Fernanda Rodriguez Rivas \n el creativo detrás de la historia: Ruben Aguilar Nuñez Alexis");
+                global.resetInstancia();
+                resetGaleryGui();
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException ex) {
+                //Thread.currentThread().interrupt();
+                System.out.println(ex);
+            }
+        }
+    }
+    }
+````
+
+
+Serie dos tiene el mayor:
+````main.java
+
+class serieDos implements Runnable {
+
+    public boolean iterar;
+    public JLabel galy;
+    fileInstancia global;
+    public JRadioButton unoX, dosX, tresX, cuatroX;
+    public JButton leer, iniciar, bocina;
+
+    serieDos(JLabel lblGaleria, JRadioButton uno, JRadioButton dos, JRadioButton tres, JRadioButton cuatro, JButton ini, JButton boci) {
+        this.galy = lblGaleria;
+        global = new fileInstancia();
+        this.unoX = uno;
+        this.dosX = dos;
+        this.tresX = tres;
+        this.cuatroX = cuatro;
+        this.bocina = boci;
+        this.iniciar = ini;
+    }
+
+    @Override
+    public void run() {
+        while (iterar != false && global.getLongitudArr() >= global.getContadorImg()) {
+            galy.setIcon(new ImageIcon(new ImageIcon(global.indexArreglo(global.getContadorImg()).getAbsolutePath()).getImage().getScaledInstance(galy.getWidth(), galy.getHeight(), Image.SCALE_SMOOTH)));
+            global.aumentarCont();
+            if (global.getContadorImg() > global.getLongitudArr()) {
+                //galy.setText(hour + ":" + (minute) + ":" + second + "->" + global.getContadorImg());
+                detener();
+                JOptionPane.showMessageDialog(galy, "CREDITOS: \n miembros del equipo: el de los chescos: Soto Guzmán Moisés Nain \n la que editó las fotos: Maria Fernanda Rodriguez Rivas \n el creativo detrás de la historia: Ruben Aguilar Nuñez Alexis");
+                global.resetInstancia();
+                resetGaleryGui();
+            }
+            try {
+                Thread.sleep(8000);
+            } catch (InterruptedException ex) {
+                //Thread.currentThread().interrupt();
+                System.out.println(ex);
+            }
+        }
+    }
+````
+
+Y así por medio de esto, ya manipulabas con creatividad la velocidad de la galería, porque sabes cuantos hilos ocuparas, en el tamagochi era más dinámico, pero sin chatgpt era un rollo
+saber cómo podías detener un hilo o descubrir que las referencias de un objeto son transferibles entre métodos también, singleton... ¿Ahora ya visualizaste
+cómo en que escenarios aplican estos hilos? es una concurrencia básica. Pero también caes en riesgo de tener código muy caótico. 
+
+No voy a refactorizar esos códigos, que flojera, pero para que se den una idea de esos casos de uso de hilos generados manualmente.
+
+La clase moderna es ExecutorService. 
