@@ -150,4 +150,9 @@ obvio tomaría más tiempo. Esa es la simple útilidad de los hilos. Son para ET
 
 El lock funciona mejor que el syncronized para el bloqueo de recursos volatiles y atómicos.
 
+<img width="578" height="492" alt="image" src="https://github.com/user-attachments/assets/84b819a0-a64b-4136-be17-dd639289a96c" />
+
+<img width="1027" height="482" alt="image" src="https://github.com/user-attachments/assets/d710ffd6-44ea-4b9f-bff5-66b639370560" />
+
+
 Le continuaremos mañana pero si está interesante.
