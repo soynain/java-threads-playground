@@ -1,2 +1,4 @@
 # java-threads-playground
-Repository to practice and play with threads, all types of classes and implementations, till reaching out some petitions by using threads
+
+En este repo jugaré con todas las clases de hilos que hayan en java, así como las estructuras
+de datos thread safe para saber yo como puedo aplicarlos.
