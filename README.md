@@ -413,3 +413,27 @@ Mismo output y rendimiento:
 
 <img width="1176" height="845" alt="image" src="https://github.com/user-attachments/assets/462e1433-5aa2-4072-958f-a3fbbd12aa79" />
 
+Dejaré por ahora unos enlaces de referencia, para estudiar otras tecnologías más.
+
+https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html
+
+https://dev.java/learn/
+
+Para reforzar los conceptos básicos: un hilo está sujeto de acuerdo a la capacidad
+de la memoría RAM (excepto los Virtual Threads de java 25), pero están limitados en paralelismo por los cores de
+tu procesador con .availableProceesors()
+
+Para tareas IO= newCacheThreadPool o fixedThread con pool definido. Para CPU, fixedThread.
+
+Evitar usar parallelStream(), para tareas IO bound, asigna muchos hilos, para cpu 2 tercios de
+tu capacidad de cpu o menos.
+
+Las estructuras de datos concurrentes son básicamente para simular patrones de consumer y producer de manera manual,
+con estructuras de datos diversas, osease puedes hacer tu redis local o tu rabbit mq, no hay mayor ciencia pero
+si talacha de implementación.
+
+No profundizaré por ahora en este tópico al menos que sea necesario.
+
+También está el tópico de flux y mono, al igual que callable y future, completablefuture de java 8, forkjoin es más recursivo, de dividir arreglos grandes y calcularlos. Puedes dividir un arreglo en n partes e ir calculando batches paralelamente en otro hilo.
+
+No necesito crear más ejemplos, porque me aburro. Voy a estudiar otras tecnologías necesarias y restantes.
